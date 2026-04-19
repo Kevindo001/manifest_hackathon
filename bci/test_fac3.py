@@ -26,7 +26,7 @@ import websockets
 # Credentials
 # ============================================================
 
-from creds import CLIENT_ID, CLIENT_SECRET
+from bci.creds import CLIENT_ID, CLIENT_SECRET
 
 # ============================================================
 # Detection parameters (tune these)

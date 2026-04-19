@@ -11,7 +11,7 @@ import ssl
 import time
 import websockets
 
-from creds import CLIENT_ID, CLIENT_SECRET
+from bci.creds import CLIENT_ID, CLIENT_SECRET
 
 # Minimum power to consider a face expression real (filters noise)
 POWER_THRESHOLD = 0.3

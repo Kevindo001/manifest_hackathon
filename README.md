@@ -1,5 +1,6 @@
 # manifest_hackathon
 
+<<<<<<< Updated upstream
 A BCI bridge that turns jaw clenches and blinks from an Emotiv headset into real-time WebSocket events, so people with limited motor control can drive apps with their face.
 
 ## What this repo contains
@@ -75,3 +76,20 @@ All loaded from `.env` at repo root (gitignored) or from your shell.
 ## Security note
 
 The Emotiv Cortex credentials previously lived in source files and may exist in earlier git history elsewhere. Treat that value as compromised and rotate it from the Emotiv dashboard at your convenience. New values go in `.env` only.
+=======
+## Structure
+
+- `backend/`: HTTP agent server (`agent.py`)
+- `bci/`: Emotiv Cortex tools + bridge (`bci_bridge.py`, diagnostics, experiments)
+- `web/`: single-file frontend (`index.html`)
+- `data/`: runtime data like `calibration.json`
+
+## Run
+
+- Agent server:
+  - `ANTHROPIC_API_KEY=... python agent.py`
+- BCI bridge:
+  - `python bci_bridge.py`
+- Frontend:
+  - open `web/index.html` in a browser
+>>>>>>> Stashed changes

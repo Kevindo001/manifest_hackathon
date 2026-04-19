@@ -21,7 +21,7 @@ import ssl
 import time
 import websockets
 
-from creds import CLIENT_ID, CLIENT_SECRET
+from bci.creds import CLIENT_ID, CLIENT_SECRET
 
 
 async def send(ws, method, params=None, req_id=[0]):

@@ -7,7 +7,7 @@ Put these in a .env at the repo root (gitignored) or export them in your shell:
 import os
 from pathlib import Path
 
-_ENV_PATH = Path(__file__).resolve().parent / ".env"
+_ENV_PATH = Path(__file__).resolve().parents[1] / ".env"
 if _ENV_PATH.exists():
     for _line in _ENV_PATH.read_text().splitlines():
         _line = _line.strip()

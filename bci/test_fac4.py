@@ -18,7 +18,7 @@ import websockets
 
 # Your Emotiv Cortex app credentials
 
-from creds import CLIENT_ID, CLIENT_SECRET
+from bci.creds import CLIENT_ID, CLIENT_SECRET
 
 # --- Power thresholds ---
 # Clench: minimum power value (0.0-1.0) to count as a real clench

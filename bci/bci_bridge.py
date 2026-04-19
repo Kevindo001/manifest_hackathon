@@ -1,18 +1,5 @@
 """
-BCI bridge v5: tripled calibration + discrete event output.
-
-Calibration (about 5 minutes total):
-  Phase 1 (rest):     60 seconds
-  Phase 2 (blinks):   30 trials
-  Phase 3 (clenches): 30 trials
-  Phase 4 (validate): 30 randomized trials (15 blink + 15 clench)
-  Phase 5 (stress):   45 seconds natural movement
-
-Event output (broadcast on ws://localhost:8765):
-  {"event": "blink",  "t": 1729300000.123}
-  {"event": "clench", "t": 1729300000.456}
-
-Both are discrete, one-shot events. No hold semantics.
+BCI bridge v4: calibration + validation + stress test + live detection.
 
 Usage:
   python bci_bridge.py              # reuse saved calibration if it exists
@@ -29,6 +16,7 @@ import ssl
 import sys
 import time
 from collections import deque, Counter
+from pathlib import Path
 
 import websockets
 from websockets.server import serve as ws_serve
@@ -36,24 +24,23 @@ from websockets.server import serve as ws_serve
 # ============================================================
 # Credentials
 # ============================================================
-from creds import CLIENT_ID, CLIENT_SECRET
+from bci.creds import CLIENT_ID, CLIENT_SECRET
 
 BRIDGE_HOST = "127.0.0.1"
 BRIDGE_PORT = 8765
-CALIBRATION_FILE = "calibration.json"
+CALIBRATION_FILE = str(
+    (Path(__file__).resolve().parents[1] / "data" / "calibration.json")
+)
 
-# ============================================================
-# Tripled calibration params
-# ============================================================
-REST_DURATION = 60             # was 20
-NUM_BLINK_TRIALS = 30          # was 10
-NUM_CLENCH_TRIALS = 30         # was 10
+REST_DURATION = 20
+NUM_BLINK_TRIALS = 10
+NUM_CLENCH_TRIALS = 10
 CUE_DURATION = 1.5
 INTER_TRIAL = 1.5
 
-NUM_VALIDATION_TRIALS_PER_CLASS = 15   # 30 total
+NUM_VALIDATION_TRIALS_PER_CLASS = 10
 VALIDATION_PASS_THRESHOLD = 0.85
-STRESS_TEST_DURATION = 45
+STRESS_TEST_DURATION = 30
 
 DEFAULT_CONFIG = {
     "clench_labels": ["clench"],
@@ -66,9 +53,6 @@ DEFAULT_CONFIG = {
 }
 
 
-# ============================================================
-# Broadcast hub (frontend connects here)
-# ============================================================
 class Hub:
     def __init__(self):
         self.clients: set = set()
@@ -99,9 +83,6 @@ class Hub:
 HUB = Hub()
 
 
-# ============================================================
-# Cortex helpers
-# ============================================================
 async def send(ws, method, params=None, req_id=[0]):
     req_id[0] += 1
     msg = {"jsonrpc": "2.0", "method": method,
@@ -127,40 +108,6 @@ async def collect_samples(ws, duration_sec):
     return samples
 
 
-async def collect_samples_with_progress(ws, duration_sec):
-    """Long collections show a progress bar so you know it's not frozen."""
-    samples = []
-    start = time.time()
-    end_time = start + duration_sec
-    last_print = -1.0
-    while time.time() < end_time:
-        try:
-            msg = await asyncio.wait_for(ws.recv(), timeout=0.5)
-        except asyncio.TimeoutError:
-            pass
-        else:
-            data = json.loads(msg)
-            if "fac" in data:
-                samples.append(tuple(data["fac"]))
-        elapsed = time.time() - start
-        if elapsed - last_print >= 1.0:
-            pct = int(elapsed / duration_sec * 100)
-            bar_len = 30
-            filled = int(bar_len * elapsed / duration_sec)
-            bar = "#" * filled + "-" * (bar_len - filled)
-            sys.stdout.write(
-                f"\r  [{bar}] {pct:3d}%  ({int(elapsed):2d}/{int(duration_sec)}s)"
-            )
-            sys.stdout.flush()
-            last_print = elapsed
-    sys.stdout.write(f"\r  [{'#'*30}] 100%  ({int(duration_sec)}/{int(duration_sec)}s)\n")
-    sys.stdout.flush()
-    return samples
-
-
-# ============================================================
-# Label analysis
-# ============================================================
 def count_lower_labels(samples):
     counts = Counter()
     powers = {}
@@ -235,9 +182,6 @@ def pick_clench_signature(rest_samples, clench_samples):
     return {"labels": labels, "min_power": max(0.0, min_pow)}
 
 
-# ============================================================
-# Save / load
-# ============================================================
 def save_calibration(config, rest_samples=None, clench_samples=None,
                      validation=None, path=CALIBRATION_FILE):
     existing = load_calibration() or {}
@@ -267,9 +211,6 @@ def load_calibration(path=CALIBRATION_FILE):
         return None
 
 
-# ============================================================
-# UI helpers
-# ============================================================
 def countdown(seconds, msg):
     for i in range(seconds, 0, -1):
         sys.stdout.write(f"\r{msg} in {i}...  ")
@@ -285,9 +226,6 @@ def big_print(text):
     print("=" * 60)
 
 
-# ============================================================
-# Detection buffer (discrete events for both blink and clench)
-# ============================================================
 class DetectionBuffer:
     def __init__(self, window, debounce):
         self.samples = deque(maxlen=window)
@@ -310,7 +248,6 @@ class DetectionBuffer:
 
 
 def apply_detector(samples, config):
-    """Offline detector used by validation and stress test."""
     blink_buf = DetectionBuffer(config["blink_window"], config["debounce"])
     clench_buf = DetectionBuffer(config["clench_window"], config["debounce"])
     allowed = set(config["clench_labels"])
@@ -329,14 +266,10 @@ def apply_detector(samples, config):
     return fires
 
 
-# ============================================================
-# Phase 4: validation
-# ============================================================
 async def run_validation(ws, config):
     big_print("PHASE 4: VALIDATION")
     print(f"\n{NUM_VALIDATION_TRIALS_PER_CLASS} blinks + "
           f"{NUM_VALIDATION_TRIALS_PER_CLASS} clenches, randomized.")
-    print(f"{2 * NUM_VALIDATION_TRIALS_PER_CLASS} trials total.")
     input("Press Enter when ready...")
 
     trials = (["blink"] * NUM_VALIDATION_TRIALS_PER_CLASS +
@@ -395,9 +328,6 @@ async def run_validation(ws, config):
     return results
 
 
-# ============================================================
-# Phase 5: stress test
-# ============================================================
 async def run_stress_test(ws, config):
     big_print("PHASE 5: STRESS TEST")
     print(f"\nFor {STRESS_TEST_DURATION}s: talk, look around, small movements.")
@@ -405,7 +335,7 @@ async def run_stress_test(ws, config):
     input("Press Enter when ready...")
     countdown(3, "Starting")
 
-    samples = await collect_samples_with_progress(ws, STRESS_TEST_DURATION)
+    samples = await collect_samples(ws, STRESS_TEST_DURATION)
     fires = apply_detector(samples, config)
     blink_fps = sum(1 for _, k in fires if k == "blink")
     clench_fps = sum(1 for _, k in fires if k == "clench")
@@ -423,23 +353,15 @@ async def run_stress_test(ws, config):
     }
 
 
-# ============================================================
-# Calibration flow
-# ============================================================
 async def calibrate(ws):
-    big_print("CALIBRATION (tripled)")
-    print(f"\n5 phases. Takes about 5 minutes.")
-    print(f"  Phase 1: {REST_DURATION}s rest")
-    print(f"  Phase 2: {NUM_BLINK_TRIALS} blinks")
-    print(f"  Phase 3: {NUM_CLENCH_TRIALS} clenches")
-    print(f"  Phase 4: {2 * NUM_VALIDATION_TRIALS_PER_CLASS} validation trials")
-    print(f"  Phase 5: {STRESS_TEST_DURATION}s stress test")
+    big_print("CALIBRATION")
+    print(f"\n5 phases. Takes ~3 minutes.")
     input("\nPress Enter when ready...")
 
     big_print("PHASE 1: REST")
-    print(f"Sit still. Neutral face. {REST_DURATION} seconds.")
+    print("Sit still. Neutral face.")
     countdown(3, "Starting")
-    rest_samples = await collect_samples_with_progress(ws, REST_DURATION)
+    rest_samples = await collect_samples(ws, REST_DURATION)
     print(f"  Collected {len(rest_samples)} samples.")
 
     big_print("PHASE 2: BLINKS")
@@ -482,22 +404,15 @@ async def calibrate(ws):
     return config
 
 
-# ============================================================
-# Live detection loop (discrete events for both blink AND clench)
-# ============================================================
 async def detect_loop(ws, config):
     big_print("LIVE DETECTION + BRIDGE ACTIVE")
     print(f"\nClench labels: {config['clench_labels']}")
     print(f"Clench min_power: {config['clench_min_power']:.2f}")
     print(f"Bridge: ws://{BRIDGE_HOST}:{BRIDGE_PORT}")
-    print(f"Event output: discrete JSON events")
-    print('  {"event": "blink",  "t": ...}')
-    print('  {"event": "clench", "t": ...}')
-    print("\nCtrl+C to quit.\n")
+    print("\nBlink/clench to drive UI. Ctrl+C to quit.\n")
 
     blink_buf = DetectionBuffer(config["blink_window"], config["debounce"])
     clench_buf = DetectionBuffer(config["clench_window"], config["debounce"])
-
     await HUB.broadcast({"event": "status", "state": "ready"})
 
     allowed = set(config["clench_labels"])
@@ -512,23 +427,16 @@ async def detect_loop(ws, config):
         eye_act, _, _, l_act, l_pow = data["fac"]
         now = data["time"]
 
-        # Discrete blink event
         if blink_buf.check(eye_act == "blink", now, required=blink_req):
-            payload = {"event": "blink", "t": now}
-            print(json.dumps(payload))
-            await HUB.broadcast(payload)
+            print("BLINK")
+            await HUB.broadcast({"event": "blink", "t": now})
 
-        # Discrete clench event
         clench_active = (l_act in allowed and l_pow >= min_power)
         if clench_buf.check(clench_active, now, required=clench_req):
-            payload = {"event": "clench", "t": now}
-            print(json.dumps(payload))
-            await HUB.broadcast(payload)
+            print(f"CLENCH ({l_act}@{l_pow:.2f})")
+            await HUB.broadcast({"event": "clench", "t": now})
 
 
-# ============================================================
-# Main pipeline
-# ============================================================
 async def cortex_pipeline(mode):
     ssl_ctx = ssl.create_default_context()
     ssl_ctx.check_hostname = False
@@ -567,12 +475,12 @@ async def cortex_pipeline(mode):
         elif mode == "tune":
             config = load_calibration()
             if config is None:
-                print("No calibration.json found.")
+                print("No calibration.json.")
                 return
         elif mode == "validate":
             config = load_calibration()
             if config is None:
-                print("No calibration.json found.")
+                print("No calibration.json.")
                 return
             v = await run_validation(ws, config)
             s = await run_stress_test(ws, config)
@@ -588,8 +496,7 @@ async def cortex_pipeline(mode):
                       f"{time.ctime(saved.get('calibrated_at', 0))}")
                 v = saved.get("validation", {})
                 if v:
-                    print(f"  Last validation accuracy: "
-                          f"{v.get('overall_accuracy', 0):.0%}")
+                    print(f"  Last validation: {v.get('overall_accuracy', 0):.0%}")
                 ans = input("\nReuse? [Y/n]: ").strip().lower()
                 if ans in ("", "y", "yes"):
                     config = saved
