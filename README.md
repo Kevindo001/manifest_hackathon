@@ -2,6 +2,8 @@
 
 ![Manifest workflow](docs/images/workflow.png)
 
+![Classification workflow](docs/images/classification-workflow.png)
+
 **Problem We Are Solving**  
 Late-stage limb-onset ALS patients can lose hand and speech ability faster than the clinical AAC approval timeline moves, creating a communication gap exactly when they need it most. Existing options are often expensive, delayed, and hard to deploy in-home quickly.
 
@@ -30,7 +32,7 @@ Legacy AAC assumes the patient must fully author each message; Manifest shifts t
 
 ### Setup
 ```bash
-cd /Users/sophiapung/Projects/Manifest/manifest_hackathon
+cd /path/to/manifest_hackathon
 python3 -m venv .venv
 source .venv/bin/activate
 pip install aiohttp websockets
