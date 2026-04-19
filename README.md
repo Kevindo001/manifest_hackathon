@@ -1,8 +1,9 @@
 # Manifest
 
-![Manifest workflow](docs/images/workflow.png)
-
-![Classification workflow](docs/images/classification-workflow.png)
+<p align="center">
+  <img src="docs/images/workflow.png" alt="Manifest workflow" width="900" />
+</p>
+<p align="center"><em>Figure 1. End-to-end user workflow.</em></p>
 
 **Problem We Are Solving**  
 Late-stage limb-onset ALS patients can lose hand and speech ability faster than the clinical AAC approval timeline moves, creating a communication gap exactly when they need it most. Existing options are often expensive, delayed, and hard to deploy in-home quickly.
@@ -14,10 +15,15 @@ Our immediate starting segment is roughly 12,000 US limb-onset ALS patients in t
 Manifest delivers the same core communication outcome at a $999 hardware entry point, no prescription, and no 6-12 week wait. The differentiator is agentic communication: instead of typing character-by-character, the AI proposes likely messages and the patient confirms with a single selection.
 
 **End-to-End Product Flow**  
-User intent is captured from blink/clench facial signals through an Emotiv headset, calibrated per user, then streamed through a BCI bridge to a local UI. From there, an AI agent powers task completion flows (messaging, emergency alert, entertainment), so the patient decides quickly while the system handles composition and execution.
+User intent is captured from blink/clench facial signals through an Emotiv headset, calibrated per user, then streamed through a BCI bridge to a local UI (see Figure 1). From there, an AI agent powers task completion flows (messaging, emergency alert, entertainment), so the patient decides quickly while the system handles composition and execution.
+
+<p align="center">
+  <img src="docs/images/classification-workflow.png" alt="Classification workflow" width="900" />
+</p>
+<p align="center"><em>Figure 2. Signal classification workflow for blink/clench detection.</em></p>
 
 **Why This Is Different**  
-Legacy AAC assumes the patient must fully author each message; Manifest shifts that burden to contextual AI inference while preserving patient control over final selection. This changes communication from slow text construction to low-effort intent confirmation.
+Legacy AAC assumes the patient must fully author each message; Manifest shifts that burden to contextual AI inference while preserving patient control over final selection. This changes communication from slow text construction to low-effort intent confirmation, while still grounding input in a measurable signal pipeline (see Figure 2).
 
 ## Run This Repo
 
