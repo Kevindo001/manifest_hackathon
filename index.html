@@ -1,0 +1,1379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Manifestation</title>
+<link rel="preconnect" href="https://rsms.me/">
+<link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+<style>
+/* ============================================================
+   Base
+   ============================================================ */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --bg-0: #0d0d11;
+  --bg-1: #16161d;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-hi: rgba(255, 255, 255, 0.07);
+  --stroke: rgba(255, 255, 255, 0.08);
+  --stroke-hi: rgba(255, 255, 255, 0.14);
+  --text: #f2f2f4;
+  --text-dim: rgba(242, 242, 244, 0.62);
+  --text-faint: rgba(242, 242, 244, 0.38);
+  --red: #ff5f57;
+  --yellow: #febc2e;
+  --green: #28c840;
+  --blue: #6ab7ff;
+  --mint: #8fe3c1;
+}
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  font-feature-settings: 'cv11', 'ss01', 'ss03';
+  font-variation-settings: 'opsz' 32;
+  background: var(--bg-0);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+}
+body {
+  background:
+    radial-gradient(1100px 700px at 15% -10%, rgba(106, 183, 255, 0.10), transparent 60%),
+    radial-gradient(900px 600px at 100% 110%, rgba(255, 95, 87, 0.08), transparent 60%),
+    radial-gradient(900px 700px at 50% 50%, rgba(143, 227, 193, 0.05), transparent 70%),
+    var(--bg-0);
+}
+
+/* ============================================================
+   Ambient orbs
+   ============================================================ */
+.orbs {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.55;
+  animation: drift 28s ease-in-out infinite alternate;
+}
+.orb--1 {
+  width: 520px; height: 520px;
+  top: -180px; left: -140px;
+  background: radial-gradient(circle, rgba(106, 183, 255, 0.45), transparent 70%);
+}
+.orb--2 {
+  width: 480px; height: 480px;
+  bottom: -160px; right: -120px;
+  background: radial-gradient(circle, rgba(255, 95, 87, 0.35), transparent 70%);
+  animation-delay: -9s;
+}
+.orb--3 {
+  width: 420px; height: 420px;
+  top: 45%; left: 40%;
+  background: radial-gradient(circle, rgba(143, 227, 193, 0.28), transparent 70%);
+  animation-delay: -18s;
+}
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(90px, -50px) scale(1.08); }
+  100% { transform: translate(-70px, 60px) scale(0.95); }
+}
+
+/* Subtle dot grid texture */
+.grid {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 40%, transparent 100%);
+}
+
+/* ============================================================
+   App shell (mac window)
+   ============================================================ */
+.app {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.titlebar {
+  display: flex;
+  align-items: center;
+  padding: 14px 20px;
+  height: 52px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px) saturate(180%);
+}
+.traffic {
+  display: flex;
+  gap: 8px;
+  width: 84px;
+}
+.traffic-light {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.25);
+}
+.traffic-light--r { background: var(--red); }
+.traffic-light--y { background: var(--yellow); }
+.traffic-light--g { background: var(--green); }
+
+.titlebar-title {
+  flex: 1;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.status {
+  display: flex;
+  gap: 14px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  align-items: center;
+  width: 180px;
+  justify-content: flex-end;
+}
+.status-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #2a2a34;
+  margin-right: 6px;
+  vertical-align: middle;
+  transition: all 0.3s ease;
+  box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+.status-dot.connected {
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(40, 200, 64, 0.7), inset 0 0 0 0.5px rgba(255, 255, 255, 0.2);
+}
+
+/* ============================================================
+   Main content
+   ============================================================ */
+.main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  min-height: 0;
+}
+.screen {
+  width: 100%;
+  max-width: 1100px;
+  animation: screenIn 0.45s cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.screen-title {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  margin-bottom: 36px;
+}
+
+/* ============================================================
+   Home cards
+   ============================================================ */
+.cards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.card {
+  position: relative;
+  flex: 1;
+  min-width: 240px;
+  max-width: 300px;
+  height: 300px;
+  border-radius: 22px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(24px) saturate(180%);
+  transition:
+    transform 0.55s cubic-bezier(0.2, 0.9, 0.3, 1),
+    box-shadow 0.55s ease,
+    border-color 0.55s ease,
+    background 0.55s ease;
+  overflow: hidden;
+  cursor: default;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: -40%;
+  background: radial-gradient(circle at center, var(--accent-glow, transparent), transparent 45%);
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 30%);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.card.focused {
+  transform: translateY(-6px);
+  border-color: var(--accent-border, var(--stroke-hi));
+  box-shadow:
+    0 20px 60px -20px rgba(0, 0, 0, 0.7),
+    0 0 0 1px var(--accent-border, transparent),
+    0 0 80px -20px var(--accent-glow, transparent);
+  animation: cardBreathe 3.6s ease-in-out infinite;
+}
+.card.focused::before { opacity: 1; }
+@keyframes cardBreathe {
+  0%, 100% { transform: translateY(-6px); }
+  50%      { transform: translateY(-9px); }
+}
+
+.card--help { --accent-border: rgba(255, 95, 87, 0.45);  --accent-glow: rgba(255, 95, 87, 0.28); }
+.card--ent  { --accent-border: rgba(106, 183, 255, 0.45); --accent-glow: rgba(106, 183, 255, 0.28); }
+.card--comm { --accent-border: rgba(143, 227, 193, 0.45); --accent-glow: rgba(143, 227, 193, 0.25); }
+
+.card-body {
+  position: relative;
+  z-index: 1;
+}
+.card-label {
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.card-sub {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-faint);
+  margin-top: 4px;
+  letter-spacing: 0.01em;
+}
+
+/* ============================================================
+   Circle icons (no emoji)
+   ============================================================ */
+.icon {
+  position: relative;
+  width: 72px;
+  height: 72px;
+}
+
+/* Help: pulsing beacon */
+.icon--help .core {
+  position: absolute;
+  inset: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8b84, var(--red));
+  box-shadow: 0 0 24px rgba(255, 95, 87, 0.55),
+              inset 0 -4px 10px rgba(0, 0, 0, 0.25);
+}
+.icon--help .ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 95, 87, 0.5);
+  animation: beacon 2.2s ease-out infinite;
+}
+.icon--help .ring:nth-child(2) { animation-delay: 0.7s; }
+.icon--help .ring:nth-child(3) { animation-delay: 1.4s; }
+@keyframes beacon {
+  0%   { transform: scale(0.55); opacity: 0.9; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+
+/* Entertainment: orbit */
+.icon--ent .core {
+  position: absolute;
+  inset: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #9ed3ff, var(--blue));
+  box-shadow: 0 0 24px rgba(106, 183, 255, 0.5),
+              inset 0 -4px 10px rgba(0, 0, 0, 0.25);
+}
+.icon--ent .orbit {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px dashed rgba(106, 183, 255, 0.28);
+  animation: orbit 7s linear infinite;
+}
+.icon--ent .orbit::after {
+  content: "";
+  position: absolute;
+  top: -4px; left: 50%;
+  transform: translateX(-50%);
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 10px var(--blue);
+}
+.icon--ent .orbit--2 {
+  inset: 10px;
+  border: 1px dashed rgba(106, 183, 255, 0.18);
+  animation: orbit 4.5s linear infinite reverse;
+}
+.icon--ent .orbit--2::after {
+  width: 5px; height: 5px;
+  top: -2.5px;
+  background: rgba(106, 183, 255, 0.7);
+  box-shadow: 0 0 6px rgba(106, 183, 255, 0.7);
+}
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Communication: two circles meeting */
+.icon--comm .c1, .icon--comm .c2 {
+  position: absolute;
+  border-radius: 50%;
+  box-shadow: inset 0 -3px 8px rgba(0, 0, 0, 0.2);
+}
+.icon--comm .c1 {
+  width: 44px; height: 44px;
+  top: 4px; left: 2px;
+  background: radial-gradient(circle at 35% 30%, #b8ecd4, var(--mint));
+  box-shadow: 0 0 20px rgba(143, 227, 193, 0.45),
+              inset 0 -3px 8px rgba(0, 0, 0, 0.2);
+  animation: bob 3.6s ease-in-out infinite;
+}
+.icon--comm .c2 {
+  width: 32px; height: 32px;
+  bottom: 4px; right: 2px;
+  background: radial-gradient(circle at 35% 30%, rgba(143, 227, 193, 0.8), rgba(143, 227, 193, 0.3));
+  box-shadow: 0 0 14px rgba(143, 227, 193, 0.3),
+              inset 0 -2px 6px rgba(0, 0, 0, 0.15);
+  animation: bob 3.6s ease-in-out infinite -1.8s;
+}
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
+
+/* ============================================================
+   Lists
+   ============================================================ */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.list-item {
+  padding: 16px 22px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all 0.4s cubic-bezier(0.2, 0.9, 0.3, 1);
+  backdrop-filter: blur(14px);
+}
+.list-item-text { flex: 1; min-width: 0; }
+.list-item-label {
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+.list-item-sub {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+.list-item-indicator {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transition: all 0.35s ease;
+  flex-shrink: 0;
+}
+.list-item.focused {
+  background: var(--surface-hi);
+  border-color: var(--stroke-hi);
+  transform: translateX(6px);
+  box-shadow:
+    0 12px 40px -16px rgba(0, 0, 0, 0.5),
+    0 0 40px -8px rgba(255, 255, 255, 0.06);
+  animation: listBreathe 2.8s ease-in-out infinite;
+}
+.list-item.focused .list-item-indicator {
+  background: var(--text);
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.7);
+  transform: scale(1.3);
+}
+@keyframes listBreathe {
+  0%, 100% { transform: translateX(6px); }
+  50%      { transform: translateX(9px); }
+}
+
+/* ============================================================
+   Emergency
+   ============================================================ */
+.emergency {
+  text-align: center;
+  padding: 20px 40px;
+}
+.emergency-core {
+  position: relative;
+  width: 180px; height: 180px;
+  margin: 0 auto 36px;
+}
+.emergency-core .core {
+  position: absolute;
+  inset: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8b84, #ff3b3b);
+  box-shadow: 0 0 60px rgba(255, 95, 87, 0.6),
+              inset 0 -10px 25px rgba(0, 0, 0, 0.3);
+  animation: corePulse 1.6s ease-in-out infinite;
+}
+.emergency-core .ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 95, 87, 0.4);
+  animation: beaconLg 2.4s ease-out infinite;
+}
+.emergency-core .ring:nth-child(3) { animation-delay: 0.8s; }
+.emergency-core .ring:nth-child(4) { animation-delay: 1.6s; }
+@keyframes corePulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
+}
+@keyframes beaconLg {
+  0%   { transform: scale(0.55); opacity: 0.8; }
+  100% { transform: scale(1.25); opacity: 0; }
+}
+.emergency-title {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.emergency-status {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.emergency-alert {
+  background: rgba(255, 95, 87, 0.07);
+  border: 1px solid rgba(255, 95, 87, 0.2);
+  border-radius: 14px;
+  padding: 20px 24px;
+  max-width: 520px;
+  margin: 0 auto 24px;
+  font-size: 14px;
+  line-height: 1.55;
+  text-align: left;
+  color: var(--text-dim);
+}
+.vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.vital {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  padding: 14px 10px;
+  border-radius: 12px;
+  text-align: center;
+}
+.vital-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+.vital-value {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 4px;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   Snake
+   ============================================================ */
+.snake-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.snake-info {
+  display: flex;
+  gap: 32px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+}
+.snake-board {
+  display: grid;
+  gap: 3px;
+  background: var(--surface);
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(14px);
+}
+.snake-cell {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.02);
+  transition: background 0.1s ease, transform 0.1s ease;
+}
+.snake-cell.snake {
+  background: radial-gradient(circle at 35% 30%, #9ed3ff, var(--blue));
+  box-shadow: 0 0 8px rgba(106, 183, 255, 0.45);
+}
+.snake-cell.head {
+  background: radial-gradient(circle at 35% 30%, #cfe7ff, #9ed3ff);
+  box-shadow: 0 0 12px rgba(163, 217, 255, 0.8);
+}
+.snake-cell.food {
+  background: radial-gradient(circle at 35% 30%, #ff8b84, var(--red));
+  box-shadow: 0 0 10px rgba(255, 95, 87, 0.6);
+  animation: foodPulse 1s ease-in-out infinite;
+}
+@keyframes foodPulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.25); }
+}
+.snake-legend {
+  margin-top: 20px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+}
+
+/* ============================================================
+   Spotify
+   ============================================================ */
+.spotify-connect {
+  text-align: center;
+  padding: 32px 20px;
+}
+.spotify-copy {
+  color: var(--text-dim);
+  margin-bottom: 28px;
+  font-size: 14px;
+}
+.track-list { max-width: 560px; margin: 0 auto; }
+.track {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  margin-bottom: 8px;
+  transition: all 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+  backdrop-filter: blur(14px);
+}
+.track.focused {
+  background: rgba(40, 200, 64, 0.08);
+  border-color: rgba(40, 200, 64, 0.35);
+  transform: translateX(6px);
+  box-shadow: 0 0 36px -10px rgba(40, 200, 64, 0.35);
+}
+.track-disc {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #16161d 22%, transparent 22.5%),
+    radial-gradient(circle at 50% 50%, #38383f 0%, #1a1a20 60%);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04),
+              0 6px 16px -6px rgba(0, 0, 0, 0.6);
+  position: relative;
+  flex-shrink: 0;
+}
+.track.focused .track-disc {
+  animation: disc 3s linear infinite;
+}
+@keyframes disc {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.track-info { flex: 1; min-width: 0; }
+.track-name {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.track-artist {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.track-indicator {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+  transition: all 0.35s ease;
+}
+.track.focused .track-indicator {
+  background: var(--green);
+  box-shadow: 0 0 10px var(--green);
+}
+
+/* ============================================================
+   Input flash
+   ============================================================ */
+.input-flash {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
+  opacity: 0;
+  z-index: 100;
+}
+.input-flash.active { animation: flashPulse 0.35s ease-out; }
+@keyframes flashPulse {
+  0%   { opacity: 0; }
+  30%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ============================================================
+   Compose / Confirm
+   ============================================================ */
+.message-preview {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  border-radius: 16px;
+  padding: 26px 28px;
+  max-width: 560px;
+  margin: 0 auto 18px;
+  font-size: 17px;
+  line-height: 1.55;
+  text-align: center;
+  color: var(--text);
+  backdrop-filter: blur(14px);
+  letter-spacing: -0.01em;
+}
+.message-to {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+.loading-spinner {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.08);
+  border-top-color: rgba(255, 255, 255, 0.6);
+  margin: 0 auto 16px;
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+.footer {
+  padding: 14px 20px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+  text-align: center;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+.footer-item { display: inline-flex; align-items: center; gap: 8px; }
+.footer kbd {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.3);
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-dim);
+  letter-spacing: 0.15em;
+}
+
+.spotify-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 24px;
+  border-radius: 999px;
+  background: #1db954;
+  color: #0b0b0f;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  box-shadow: 0 10px 32px -8px rgba(29, 185, 84, 0.5);
+  border: none;
+}
+.spotify-btn::before {
+  content: "";
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: #0b0b0f;
+}
+</style>
+</head>
+<body>
+
+<div class="grid"></div>
+<div class="orbs">
+  <div class="orb orb--1"></div>
+  <div class="orb orb--2"></div>
+  <div class="orb orb--3"></div>
+</div>
+<div class="input-flash" id="inputFlash"></div>
+
+<div class="app">
+  <div class="titlebar">
+    <div class="traffic">
+      <div class="traffic-light traffic-light--r"></div>
+      <div class="traffic-light traffic-light--y"></div>
+      <div class="traffic-light traffic-light--g"></div>
+    </div>
+    <div class="titlebar-title">Manifestation</div>
+    <div class="status">
+      <span><span class="status-dot" id="bciDot"></span>BCI</span>
+      <span><span class="status-dot" id="agentDot"></span>Agent</span>
+    </div>
+  </div>
+
+  <div class="main" id="main"></div>
+
+  <div class="footer">
+    <span class="footer-item"><kbd>Blink</kbd>Cycle</span>
+    <span class="footer-item"><kbd>Clench</kbd>Select</span>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// Config
+// ============================================================
+const BCI_WS = "ws://localhost:8765";
+const AGENT_URL = "http://localhost:8766";
+
+// ============================================================
+// Flash on input
+// ============================================================
+function flashInput() {
+  const el = document.getElementById("inputFlash");
+  el.classList.remove("active");
+  void el.offsetWidth;
+  el.classList.add("active");
+}
+
+// ============================================================
+// BCI WebSocket
+// ============================================================
+let bciSocket = null;
+function connectBCI() {
+  bciSocket = new WebSocket(BCI_WS);
+  bciSocket.onopen = () => {
+    document.getElementById("bciDot").classList.add("connected");
+  };
+  bciSocket.onclose = () => {
+    document.getElementById("bciDot").classList.remove("connected");
+    setTimeout(connectBCI, 1500);
+  };
+  bciSocket.onmessage = (evt) => {
+    const data = JSON.parse(evt.data);
+    if (data.event === "blink") { flashInput(); onBlink(); }
+    else if (data.event === "clench") { flashInput(); onClench(); }
+  };
+}
+connectBCI();
+
+// Keyboard fallback for debugging
+document.addEventListener("keydown", (e) => {
+  if (e.key === "b" || e.key === "B") { flashInput(); onBlink(); }
+  if (e.key === "c" || e.key === "C") { flashInput(); onClench(); }
+});
+
+// ============================================================
+// Agent health check
+// ============================================================
+fetch(AGENT_URL + "/spotify/status")
+  .then(r => r.json())
+  .then(() => document.getElementById("agentDot").classList.add("connected"))
+  .catch(() => {});
+
+// ============================================================
+// State machine
+// ============================================================
+const state = {
+  screen: "home",
+  focusIndex: 0,
+  data: {},
+};
+
+function onBlink() {
+  const items = currentItems();
+  if (!items || items.length === 0) return;
+  state.focusIndex = (state.focusIndex + 1) % items.length;
+  render();
+}
+
+function onClench() {
+  const items = currentItems();
+  if (!items || items.length === 0) return;
+  const selected = items[state.focusIndex];
+  if (selected && selected.onSelect) selected.onSelect();
+}
+
+function currentItems() {
+  return screenItems[state.screen] ? screenItems[state.screen]() : [];
+}
+
+function go(screen, data = {}) {
+  state.screen = screen;
+  state.focusIndex = 0;
+  state.data = { ...state.data, ...data };
+  render();
+}
+
+// ============================================================
+// Screens
+// ============================================================
+const screenItems = {
+  home: () => [
+    { kind: "help",  onSelect: () => triggerEmergency() },
+    { kind: "ent",   onSelect: () => go("ent") },
+    { kind: "comm",  onSelect: () => go("comm") },
+  ],
+  ent: () => [
+    { label: "Spotify", onSelect: () => go("spotify") },
+    { label: "Snake",   onSelect: () => go("snake") },
+    { label: "Back",    onSelect: () => go("home") },
+  ],
+  comm: () => [
+    { label: "Contacts", onSelect: () => loadContacts() },
+    { label: "Back",     onSelect: () => go("home") },
+  ],
+  contacts: () => {
+    const items = (state.data.contacts || []).map(c => ({
+      label: c.name,
+      sub: c.phone,
+      onSelect: () => suggestMessages(c),
+    }));
+    items.push({ label: "Back", onSelect: () => go("comm") });
+    return items;
+  },
+  compose: () => {
+    const items = (state.data.suggestedMessages || []).map(m => ({
+      label: m,
+      onSelect: () => go("confirm", { selectedMessage: m }),
+    }));
+    items.push({ label: "Regenerate", onSelect: () => suggestMessages(state.data.selectedContact) });
+    items.push({ label: "Cancel", onSelect: () => go("contacts") });
+    return items;
+  },
+  confirm: () => [
+    { label: "Send", onSelect: () => sendMessage() },
+    { label: "Cancel", onSelect: () => go("compose") },
+  ],
+  emergency: () => [
+    { label: "Back to home", onSelect: () => go("home") },
+  ],
+  spotify: () => {
+    if (!state.data.spotifyConnected) return [
+      { label: "Connect Spotify", onSelect: () => connectSpotify() },
+      { label: "Back", onSelect: () => go("ent") },
+    ];
+    const items = (state.data.tracks || []).map(t => ({
+      label: t.name, sub: t.artist, uri: t.uri,
+      onSelect: () => playTrack(t.uri),
+    }));
+    items.push({ label: "Pause", onSelect: () => spotifyPause() });
+    items.push({ label: "Next",  onSelect: () => spotifyNext() });
+    items.push({ label: "Back",  onSelect: () => go("ent") });
+    return items;
+  },
+  snake: () => [],
+};
+
+// ============================================================
+// Render
+// ============================================================
+const main = document.getElementById("main");
+
+function render() {
+  if (state.screen === "home")        return renderHome();
+  if (state.screen === "ent")         return renderList("Entertainment");
+  if (state.screen === "comm")        return renderList("Communication");
+  if (state.screen === "contacts")    return renderList("Contacts");
+  if (state.screen === "compose")     return renderCompose();
+  if (state.screen === "confirm")     return renderConfirm();
+  if (state.screen === "emergency")   return renderEmergency();
+  if (state.screen === "spotify")     return renderSpotify();
+  if (state.screen === "snake")       return renderSnake();
+}
+
+function iconHTML(kind) {
+  if (kind === "help") {
+    return `<div class="icon icon--help">
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="ring"></div>
+      <div class="core"></div>
+    </div>`;
+  }
+  if (kind === "ent") {
+    return `<div class="icon icon--ent">
+      <div class="orbit"></div>
+      <div class="orbit orbit--2"></div>
+      <div class="core"></div>
+    </div>`;
+  }
+  return `<div class="icon icon--comm">
+    <div class="c1"></div>
+    <div class="c2"></div>
+  </div>`;
+}
+
+function cardMeta(kind) {
+  if (kind === "help") return { label: "Help",          sub: "Emergency alert" };
+  if (kind === "ent")  return { label: "Entertainment", sub: "Music and games" };
+  return                    { label: "Communication", sub: "Message loved ones" };
+}
+
+function renderHome() {
+  const items = screenItems.home();
+  main.innerHTML = `
+    <div class="screen">
+      <div class="cards">
+        ${items.map((it, i) => {
+          const m = cardMeta(it.kind);
+          return `
+            <div class="card card--${it.kind} ${i === state.focusIndex ? "focused" : ""}">
+              ${iconHTML(it.kind)}
+              <div class="card-body">
+                <div class="card-label">${m.label}</div>
+                <div class="card-sub">${m.sub}</div>
+              </div>
+            </div>`;
+        }).join("")}
+      </div>
+    </div>`;
+}
+
+function renderList(title) {
+  const items = currentItems();
+  main.innerHTML = `
+    <div class="screen">
+      <div class="screen-title">${title}</div>
+      <div class="list">
+        ${items.map((it, i) => `
+          <div class="list-item ${i === state.focusIndex ? "focused" : ""}">
+            <div class="list-item-text">
+              <div class="list-item-label">${it.label}</div>
+              ${it.sub ? `<div class="list-item-sub">${it.sub}</div>` : ""}
+            </div>
+            <div class="list-item-indicator"></div>
+          </div>
+        `).join("")}
+      </div>
+    </div>`;
+}
+
+function renderCompose() {
+  if (!state.data.suggestedMessages) {
+    main.innerHTML = `
+      <div class="screen">
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          Generating messages
+        </div>
+      </div>`;
+    return;
+  }
+  renderList("Compose Message");
+}
+
+function renderConfirm() {
+  const items = currentItems();
+  main.innerHTML = `
+    <div class="screen">
+      <div class="screen-title">Confirm Send</div>
+      <div class="message-preview">${state.data.selectedMessage}</div>
+      <div class="message-to">To &middot; ${state.data.selectedContact?.name || ""}</div>
+      <div class="list">
+        ${items.map((it, i) => `
+          <div class="list-item ${i === state.focusIndex ? "focused" : ""}">
+            <div class="list-item-text">
+              <div class="list-item-label">${it.label}</div>
+            </div>
+            <div class="list-item-indicator"></div>
+          </div>
+        `).join("")}
+      </div>
+    </div>`;
+}
+
+function renderEmergency() {
+  const alert = state.data.emergencyAlert;
+  const vitals = state.data.emergencyVitals || {};
+  main.innerHTML = `
+    <div class="screen">
+      <div class="emergency">
+        <div class="emergency-core">
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <div class="core"></div>
+        </div>
+        <div class="emergency-title">${alert ? "Nurse Alerted" : "Alerting Nurse"}</div>
+        <div class="emergency-status">${alert ? "Signal delivered" : "Sending"}</div>
+        ${alert ? `<div class="emergency-alert">${alert}</div>` : ""}
+        ${Object.keys(vitals).length ? `
+          <div class="vitals-grid">
+            <div class="vital"><div class="vital-label">HR</div><div class="vital-value">${vitals.heart_rate || "--"}</div></div>
+            <div class="vital"><div class="vital-label">BP</div><div class="vital-value">${vitals.blood_pressure || "--"}</div></div>
+            <div class="vital"><div class="vital-label">SpO&#8322;</div><div class="vital-value">${vitals.spo2 || "--"}%</div></div>
+            <div class="vital"><div class="vital-label">Temp</div><div class="vital-value">${vitals.temperature || "--"}&deg;</div></div>
+          </div>` : ""}
+        <div style="margin-top:32px" class="list">
+          <div class="list-item focused">
+            <div class="list-item-text"><div class="list-item-label">Back to home</div></div>
+            <div class="list-item-indicator"></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderSpotify() {
+  if (!state.data.spotifyConnected) {
+    const items = currentItems();
+    main.innerHTML = `
+      <div class="screen">
+        <div class="screen-title">Spotify</div>
+        <div class="spotify-connect">
+          <div class="spotify-copy">Connect your Spotify account to play music.</div>
+          <div class="list">
+            ${items.map((it, i) => `
+              <div class="list-item ${i === state.focusIndex ? "focused" : ""}">
+                <div class="list-item-text"><div class="list-item-label">${it.label}</div></div>
+                <div class="list-item-indicator"></div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+  const items = currentItems();
+  main.innerHTML = `
+    <div class="screen">
+      <div class="screen-title">Spotify</div>
+      <div class="track-list">
+        ${items.map((it, i) => `
+          <div class="track ${i === state.focusIndex ? "focused" : ""}">
+            <div class="track-disc"></div>
+            <div class="track-info">
+              <div class="track-name">${it.label}</div>
+              ${it.sub ? `<div class="track-artist">${it.sub}</div>` : ""}
+            </div>
+            <div class="track-indicator"></div>
+          </div>
+        `).join("")}
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// Snake
+// ============================================================
+let snakeState = null;
+let snakeLoop = null;
+
+function renderSnake() {
+  if (!snakeState) initSnake();
+  drawSnake();
+}
+
+function initSnake() {
+  const N = 15;
+  snakeState = {
+    N,
+    snake: [{x:7, y:7}, {x:6, y:7}, {x:5, y:7}],
+    dir: {x:1, y:0},
+    food: {x:10, y:7},
+    score: 0,
+    dead: false,
+  };
+  if (snakeLoop) clearInterval(snakeLoop);
+  snakeLoop = setInterval(tickSnake, 180);
+}
+
+function tickSnake() {
+  if (!snakeState || snakeState.dead) return;
+  const s = snakeState;
+  const head = s.snake[0];
+  const nh = {x: head.x + s.dir.x, y: head.y + s.dir.y};
+  if (nh.x < 0 || nh.x >= s.N || nh.y < 0 || nh.y >= s.N) { s.dead = true; drawSnake(); return; }
+  if (s.snake.some(c => c.x === nh.x && c.y === nh.y)) { s.dead = true; drawSnake(); return; }
+  s.snake.unshift(nh);
+  if (nh.x === s.food.x && nh.y === s.food.y) {
+    s.score++;
+    let placed = false;
+    while (!placed) {
+      s.food = {x: Math.floor(Math.random()*s.N), y: Math.floor(Math.random()*s.N)};
+      placed = !s.snake.some(c => c.x === s.food.x && c.y === s.food.y);
+    }
+  } else {
+    s.snake.pop();
+  }
+  drawSnake();
+}
+
+function drawSnake() {
+  if (state.screen !== "snake") return;
+  const s = snakeState;
+  let cells = "";
+  for (let y = 0; y < s.N; y++) {
+    for (let x = 0; x < s.N; x++) {
+      let cls = "snake-cell";
+      if (s.snake[0].x === x && s.snake[0].y === y) cls += " head";
+      else if (s.snake.some(c => c.x === x && c.y === y)) cls += " snake";
+      else if (s.food.x === x && s.food.y === y) cls += " food";
+      cells += `<div class="${cls}"></div>`;
+    }
+  }
+  main.innerHTML = `
+    <div class="screen">
+      <div class="screen-title">Snake</div>
+      <div class="snake-wrap">
+        <div class="snake-info">
+          <span>Score &middot; ${s.score}</span>
+          ${s.dead ? `<span style="color:var(--red)">Game Over</span>` : ""}
+        </div>
+        <div class="snake-board" style="grid-template-columns: repeat(${s.N}, 20px); grid-template-rows: repeat(${s.N}, 20px);">
+          ${cells}
+        </div>
+        <div class="snake-legend">Blink turns left &middot; Clench turns right &middot; Double clench exits</div>
+      </div>
+    </div>`;
+}
+
+// Override input for snake
+const origBlink = onBlink;
+const origClench = onClench;
+let lastClenchT = 0;
+window.onBlink = function() {
+  if (state.screen === "snake") {
+    if (snakeState.dead) { initSnake(); return; }
+    snakeState.dir = { x: snakeState.dir.y, y: -snakeState.dir.x };
+  } else {
+    origBlink();
+  }
+};
+window.onClench = function() {
+  if (state.screen === "snake") {
+    const now = Date.now();
+    if (now - lastClenchT < 600) {
+      clearInterval(snakeLoop); snakeLoop = null; snakeState = null;
+      go("ent"); return;
+    }
+    lastClenchT = now;
+    if (snakeState.dead) { initSnake(); return; }
+    snakeState.dir = { x: -snakeState.dir.y, y: snakeState.dir.x };
+  } else {
+    origClench();
+  }
+};
+function onBlink() { window.onBlink(); }
+function onClench() { window.onClench(); }
+
+// ============================================================
+// Agent calls
+// ============================================================
+async function triggerEmergency() {
+  go("emergency", { emergencyAlert: null, emergencyVitals: {} });
+  try {
+    const r = await fetch(AGENT_URL + "/emergency", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ vitals: {} }),
+    });
+    const data = await r.json();
+    state.data.emergencyAlert = data.alert;
+    state.data.emergencyVitals = data.vitals || {};
+    render();
+  } catch (e) {
+    state.data.emergencyAlert = "Alert sent (offline mode).";
+    render();
+  }
+}
+
+async function loadContacts() {
+  go("contacts", { contacts: null });
+  main.innerHTML = `<div class="screen"><div class="loading"><div class="loading-spinner"></div>Loading contacts</div></div>`;
+  try {
+    const r = await fetch(AGENT_URL + "/contacts");
+    const data = await r.json();
+    state.data.contacts = data.contacts || [];
+    render();
+  } catch (e) {
+    state.data.contacts = [];
+    render();
+  }
+}
+
+async function suggestMessages(contact) {
+  go("compose", { selectedContact: contact, suggestedMessages: null });
+  try {
+    const r = await fetch(AGENT_URL + "/suggest-messages", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ contact: contact.name, context: "" }),
+    });
+    const data = await r.json();
+    state.data.suggestedMessages = data.messages || [];
+    render();
+  } catch (e) {
+    state.data.suggestedMessages = ["Hi", "Thinking of you", "Call me when you can", "Love you"];
+    render();
+  }
+}
+
+async function sendMessage() {
+  const contact = state.data.selectedContact;
+  const message = state.data.selectedMessage;
+  main.innerHTML = `<div class="screen"><div class="loading"><div class="loading-spinner"></div>Sending</div></div>`;
+  try {
+    await fetch(AGENT_URL + "/send-message", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ phone: contact.phone, message }),
+    });
+  } catch (e) { /* ignore */ }
+  setTimeout(() => go("home"), 1200);
+}
+
+async function connectSpotify() {
+  try {
+    const r = await fetch(AGENT_URL + "/spotify/auth-url");
+    const { url } = await r.json();
+    window.open(url, "_blank");
+    const poll = setInterval(async () => {
+      const s = await (await fetch(AGENT_URL + "/spotify/status")).json();
+      if (s.connected) {
+        clearInterval(poll);
+        loadSpotifyTracks();
+      }
+    }, 1500);
+  } catch (e) {}
+}
+
+async function loadSpotifyTracks() {
+  try {
+    const r = await fetch(AGENT_URL + "/spotify/top-tracks");
+    const data = await r.json();
+    state.data.spotifyConnected = true;
+    state.data.tracks = data.tracks || [];
+    render();
+  } catch (e) {}
+}
+
+async function playTrack(uri) {
+  await fetch(AGENT_URL + "/spotify/play", {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ uri }),
+  });
+}
+async function spotifyPause()    { await fetch(AGENT_URL + "/spotify/pause", {method: "POST"}); }
+async function spotifyNext()     { await fetch(AGENT_URL + "/spotify/next",  {method: "POST"}); }
+
+// ============================================================
+// Auto-check Spotify connection on ent -> spotify navigation
+// ============================================================
+const origGo = go;
+window.go = async function(screen, data) {
+  origGo(screen, data);
+  if (screen === "spotify") {
+    try {
+      const s = await (await fetch(AGENT_URL + "/spotify/status")).json();
+      if (s.connected) { loadSpotifyTracks(); }
+    } catch (e) {}
+  }
+};
+
+// Initial render
+render();
+</script>
+</body>
+</html>

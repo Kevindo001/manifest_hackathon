@@ -1,0 +1,98 @@
+{
+  "clench_labels": [
+    "clench"
+  ],
+  "clench_min_power": 0.31913111776859543,
+  "clench_required": 2,
+  "clench_window": 4,
+  "blink_required": 1,
+  "blink_window": 3,
+  "debounce": 0.6,
+  "calibrated_at": 1776587052,
+  "rest_distribution": {
+    "laugh": {
+      "frequency": 0.5555555555555556,
+      "avg_power": 0.24814493809523744,
+      "max_power": 1.0,
+      "count": 840
+    },
+    "neutral": {
+      "frequency": 0.3253968253968254,
+      "avg_power": 0.0,
+      "max_power": 0.0,
+      "count": 492
+    },
+    "smile": {
+      "frequency": 0.07407407407407407,
+      "avg_power": 0.49894599999999983,
+      "max_power": 1.0,
+      "count": 112
+    },
+    "smirkLeft": {
+      "frequency": 0.04497354497354497,
+      "avg_power": 0.23200658823529424,
+      "max_power": 1.0,
+      "count": 68
+    }
+  },
+  "clench_distribution": {
+    "smile": {
+      "frequency": 0.13835770528683913,
+      "avg_power": 0.6783342926829277,
+      "max_power": 1.0,
+      "count": 246
+    },
+    "laugh": {
+      "frequency": 0.1844769403824522,
+      "avg_power": 0.3516735243902439,
+      "max_power": 1.0,
+      "count": 328
+    },
+    "neutral": {
+      "frequency": 0.08323959505061868,
+      "avg_power": 0.0,
+      "max_power": 0.0,
+      "count": 148
+    },
+    "smirkLeft": {
+      "frequency": 0.0359955005624297,
+      "avg_power": 0.8142878125,
+      "max_power": 1.0,
+      "count": 64
+    },
+    "clench": {
+      "frequency": 0.5444319460067492,
+      "avg_power": 0.6382622355371909,
+      "max_power": 1.0,
+      "count": 968
+    },
+    "smirkRight": {
+      "frequency": 0.013498312710911136,
+      "avg_power": 0.9363576666666665,
+      "max_power": 1.0,
+      "count": 24
+    }
+  },
+  "validation": {
+    "blink": {
+      "cued": 10,
+      "correct": 2,
+      "missed": 7,
+      "wrong_class": 1
+    },
+    "clench": {
+      "cued": 10,
+      "correct": 8,
+      "missed": 0,
+      "wrong_class": 2
+    },
+    "false_positive_rest": 32,
+    "overall_accuracy": 0.5,
+    "passed": false,
+    "stress_test": {
+      "duration_sec": 30,
+      "false_blinks": 13,
+      "false_clenches": 0
+    }
+  }
+}

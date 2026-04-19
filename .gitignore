@@ -1,0 +1,28 @@
+# Manifestation app (tracked separately in Archit-lal/Manifestation)
+Manifestation/
+
+# Secrets
+.env
+**/.env
+**/.env.local
+
+# Node
+node_modules/
+**/node_modules/
+
+# Python
+emotiv/
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
