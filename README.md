@@ -18,7 +18,7 @@ Manifest delivers the same core communication outcome at a $999 hardware entry p
 User intent is captured from blink/clench facial signals through an Emotiv headset, calibrated per user, then streamed through a BCI bridge to a local UI (see Figure 1). From there, an AI agent powers task completion flows (messaging, emergency alert, entertainment), so the patient decides quickly while the system handles composition and execution.
 
 <p align="center">
-  <img src="docs/images/classification-workflow.png" alt="Classification workflow" width="900" />
+  <img src="docs/images/classification-workflow-v2.png" alt="Classification workflow" width="900" />
 </p>
 <p align="center"><em>Figure 2. Signal classification workflow for blink/clench detection.</em></p>
 
